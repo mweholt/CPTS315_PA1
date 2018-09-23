@@ -11,50 +11,68 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <iterator>
+#include <map>
+#include <algorithm>
 using namespace std;
 
 int support = 100;
 
 struct item{
     string name;
-    int freq;
     int basket;
     
-    item(string n = "", int f = 0, int b = 0): name(n), freq(f), basket(b){}
+    item(string n = "", int b = 0): name(n), basket(b){}
 };
 
 struct _pair{
-    string item1;
-    string item2;
-    string item3;
-    int freq = 0;
-    int conf;
-    
-    _pair(string n1="", string n2="", int c=0): item1(n1), item2(n2), conf(c){}
-    //_pair(string n1="", string n2="", string n3="", int c=0): item1(n1), item2(n2), item3(n3), conf(c){}
+    string item1 = "";
+    string item2 = "";
+	string item3 = "";
+	int conf = 0;
+	int freq = 0;
 };
 
-bool isSupportMet (string name, vector<item> list) {
-    for (int i = 0; i <list.size(); i++) {
-        if (list[i].name == name) {
-            if (list[i].freq >= support) {
-                return true;
-            }
-            else {break;}
-        }
-    }
-    return false;
+_pair makePair(string item1, string item2, string item3 = "", int conf = 0, int freq = 1) {
+	_pair temp;
+	temp.item1 = item1;
+	temp.item2 = item2;
+	temp.item3 = item3;
+	temp.conf = conf;
+	temp.freq = 1;
+
+	return temp;
 }
 
-int findPair (string name1, string name2, vector<_pair> pairs) {
-    int a = -1;
-    for (int i = 0; i < pairs.size(); i++) {
-        if ((pairs[i].item1 == name1 && pairs[i].item2 == name2) || (pairs[i].item1 == name2 && pairs[i].item2 == name1)) {
-            a = i;
-        }
-    }
-    return a;
+void addPair(string item1, string item2, map<string, _pair> &pairs) {
+	_pair temp1 = makePair(item1, item2);
+
+	auto it = pairs.find(item1+item2);
+	if (it != pairs.end()) {
+		it->second.freq++;
+		//cout << "found matching pair" << endl;
+		return;
+	}
+	else { pairs.insert(pair<string, _pair>(item1 + item2, temp1)); }
+	//cout << "created new pair" << endl;
 }
+
+bool isFrequent(string item, map<string, int> freq) {
+	bool out = true;
+	if (freq.find(item)->second < 100) { return false; }
+	return out;
+}
+
+
+
+class apriori {
+private:
+	// Baslet #, 
+	vector<vector<string>> items;
+
+
+
+};
 
 
 int main(int argc, const char * argv[]) {
@@ -62,80 +80,39 @@ int main(int argc, const char * argv[]) {
     inFile.open("browsing-data.txt");
     //inFile.open("test.txt");
     
-    vector<item> freqItems;
-    vector<item> allItems;
-    vector<_pair> pairs;
+	map<string, int> frequency;
+	vector<vector<string> > allItems;
+	map<string, _pair> pairs;
     
-    int line = 1;
+    int line = 0;
     string str;
     string word;
     
+	vector<string> temp;
     
     // Read every line and place items into vector
-    getline(inFile,str);
-    istringstream buffer(str);
-    while(buffer >> word) {
-        freqItems.push_back(item(word,1,line));
-        allItems.push_back(item(word,-1,line));
-    }
-    
-    
-    while (getline(inFile, str)) {
-        cout << "Reading line" << endl;
-        istringstream buffer(str);
-        line++;
-        while(buffer >> word) {
-            for(int i=0; i<freqItems.size();++i) {
-                if (freqItems[i].name == word) {
-                    freqItems[i].freq += 1;
-                    allItems.push_back(item(word,-1,line));
-                    cout << "Found match" << endl;
-                    break;
-                    
-                }
-                if (i==freqItems.size()-1) {
-                    freqItems.push_back(item(word,1,line));
-                    allItems.push_back(item(word,-1,line));
-                    cout << "New Item added" << endl;
-                    break;     
-                }
-            }
-        }
-    }
-    
-    
-    
-    //Create 2-pairs
-    int x = 1;
-    bool b = true;
-    int loc = -1;
-    int baskets = 1;
-    for (int i = 0; i<allItems.size();i++) {
-        while (b) {
-            if (isSupportMet(allItems[i].name, freqItems) && allItems[i+x].basket == allItems[i].basket) {
-                if (isSupportMet(allItems[i+x].name, freqItems)) {
-                    loc = findPair(allItems[i].name, allItems[i+x].name, pairs);
-                    if (loc == -1) {
-                        pairs.push_back(_pair(allItems[i].name, allItems[i+x].name));
-                    }
-                    else {
-                        pairs[loc].freq++;
-                    }
-                }
-                x++;
-                //cout << "{" << allItems[i].name << ", " << allItems[i+x].name << "}" << endl;
-            }
-            else {b = false;}
-        }
-        b = true;
-        x = 1;
-        
-        // Ddebugging
-        if (allItems[i].basket + 1 != allItems[i].basket) {
-            cout << "Basket #" << baskets << "finished" << endl;
-            baskets++;
-        }
-    }
+	while (getline(inFile, str)) {
+		istringstream buffer(str);
+		while (buffer >> word) {
+			// Check frequent list and add entry if needed
+			auto it = frequency.find(word);
+			if (it != frequency.end()) { it->second++; }
+			else { frequency.insert(pair<string, int>(word, 1)); }
+			
+			//Add to master list
+			temp.push_back(word);
+		}
+		
+		sort(temp.begin(), temp.end());
+		allItems.push_back(temp);
+		temp.clear();
+		cout << "Line " << line << " completed" << endl;
+		line++;
+	}
+
+	
+
+
     
     return 0;
 }
