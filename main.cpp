@@ -105,7 +105,7 @@ void Combination(const vector<string>& v, int count)
 
 int main(int argc, const char * argv[]) {
     ifstream inFile;
-    inFile.open("browsing-data.txt");
+    inFile.open("./browsing-data.txt");
     //inFile.open("test.txt");
     
     vector<string> ftemp;
@@ -212,7 +212,7 @@ int main(int argc, const char * argv[]) {
     
     
     // Print
-    ofstream outFile("output.txt");
+    ofstream outFile("./output.txt");
     outFile << "OUTPUT A" << endl;
     for (int i = 4; i > 0; i--) {
         outFile << pair2Final[i].item1 << " " << pair2Final[i].item2 << " " << pair2Final[4].conf << endl;
@@ -221,6 +221,7 @@ int main(int argc, const char * argv[]) {
     for (int i = 4; i > 0; i--) {
         outFile << pair3Final[i].item1 << " " << pair3Final[i].item2 << " " << pair3Final[i].item3 << " " << pair3Final[i+4].conf << endl;
     }
+    outFile.close();
     
     
     return 0;
