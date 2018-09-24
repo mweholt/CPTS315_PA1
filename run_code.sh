@@ -1,0 +1,1 @@
+#!/bin/sh PA1.exe
