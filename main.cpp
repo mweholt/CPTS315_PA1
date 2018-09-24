@@ -14,6 +14,7 @@
 #include <iterator>
 #include <map>
 #include <algorithm>
+#include<assert.h>
 using namespace std;
 
 int support = 100;
